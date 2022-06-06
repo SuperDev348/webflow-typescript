@@ -1,0 +1,14 @@
+{
+    "editor.tabSize": 2,
+    "editor.formatOnSave": true,
+    "tslint.autoFixOnSave": true,
+    "editor.codeActionsOnSave": { "source.fixAll.eslint": true },
+    "search.exclude": {
+      "**/node_modules": true,
+      "**/bower_components": true,
+      "**/*.code-search": true,
+      "**/ios": true,
+      "**/android": true
+    },
+    "git.ignoreLimitWarning": true
+  }
