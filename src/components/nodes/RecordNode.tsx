@@ -7,6 +7,7 @@ import {
   DbProvider,
   PathwayThemeProvider,
   ClinicalImpression,
+  ButtonStates,
 } from '@pathwaymd/pathway-ui2'
 
 import {
@@ -87,11 +88,11 @@ export const RecordNode = (props: RecordNodePropsType) => {
               <Suspense fallback={null}>
                 <ClinicalImpression
                   diseaseId={disease.id}
-                  impressionIndex={0}
-                  onCurrentImpressionIndexChange={(index: number) => {
+                  initialState={{}}
+                  onButtonStatesChange={(state: ButtonStates) => {
                     const newState = {
                       diseaseId,
-                      impression: probabilityTextValues[index],
+                      impression: probabilityTextValues[0],
                     }
                     setNodeState(newState)
                     onStateUpdate(newState)

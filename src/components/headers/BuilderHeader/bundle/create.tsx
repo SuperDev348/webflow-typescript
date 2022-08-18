@@ -79,7 +79,7 @@ const Create = forwardRef<CreateFunctionInterface, CreateProps>((props, ref) => 
     <>
       <Button w="100%" colorScheme="blue" onClick={handleAdd}>
         <AddIcon />
-        <Text ml="4">Create a new bundle</Text>
+        <Text ml="4">Create a new pathway</Text>
       </Button>
       {isShow &&
         <>
@@ -90,7 +90,7 @@ const Create = forwardRef<CreateFunctionInterface, CreateProps>((props, ref) => 
             mt="32px"
           ></Box>
           <Heading size="md" mb="16px" mt="24px">
-            Create bundle
+            Create pathway
           </Heading>
           <Box mt="8px">
             <Box>

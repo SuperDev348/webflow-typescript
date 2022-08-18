@@ -30,19 +30,6 @@ const Edit = (props: EditProps) => {
   const [bundle, setBundle] = useState<BundleType>()
   const [protocolName, setProtocolName] = useState<string>('')
 
-  const create = async (_bundle: BundleType, _protocolName: string) => {
-    const res = await createProtocol({
-      records: [
-        {
-          fields: {
-            name: _protocolName,
-            bundles: [_bundle.id],
-          },
-        },
-      ],
-    })
-    window.location.href = `/builder/${res.records[0].id}/bundles/${_bundle.id}`
-  }
   const update = async (_bundle: BundleType, _protocol: ProtocolType) => {
     const res = await updateProtocol({
       records: [
@@ -55,6 +42,19 @@ const Edit = (props: EditProps) => {
       ],
     })
     window.location.href = `/builder/${res.records[0].id}/bundles/${_bundle.id}`
+  }
+  const updateProtocolName = async (_protocolName) => {
+    await updateProtocol({
+      records: [
+        {
+          id: selProtocol.id,
+          fields: {
+            name: _protocolName
+          },
+        },
+      ],
+    })
+    window.location.reload()
   }
   const handleOpen = () => {
     setProtocolName(selProtocol?.fields.name)
@@ -82,7 +82,8 @@ const Edit = (props: EditProps) => {
             break
           }
         } else if (i === builderState.protocols.length - 1) {
-          create(selBundle, protocolName)
+          // create(selBundle, protocolName)
+          updateProtocolName(protocolName)
         }
       }
     }
@@ -130,6 +131,7 @@ const Edit = (props: EditProps) => {
                 type="text"
                 value={protocolName ?? ''}
                 className="addprotocol"
+                style={{border: 'solid 2px #5b7fe5', borderRadius: 4}}
                 onChange={event => setProtocolName(event.target.value)}
               />
             </Box>

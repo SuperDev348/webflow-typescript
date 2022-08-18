@@ -48,6 +48,8 @@ import { getFilter as getExpression } from '../api/expression'
 import { getFilter } from '../api/filter'
 import { getFilter as getNote } from '../api/note'
 
+import { flatten, every, some } from 'lodash'
+
 const PageContext = React.createContext({})
 Date.prototype.toISOString = function () {
   var tzo = -this.getTimezoneOffset(),
@@ -170,10 +172,10 @@ export default function Manager({ patientId }: { patientId?: string }) {
   const [bundleEligibility, setBundleEligibility] = useState<{}>()
 
   const statusGroups = [
-    { name: 'eligible', title: 'Eligible bundles', color: '#d9e7fd' },
+    { name: 'eligible', title: 'Eligible pathways', color: '#d9e7fd' },
     { name: 'inProgress', title: 'In progress', color: '#ffe6cd' },
     { name: 'completed', title: 'Completed', color: '#d4e7d7' },
-    { name: 'ineligible', title: 'Ineligible bundles', color: '#f5f5f5' },
+    { name: 'ineligible', title: 'Ineligible pathways', color: '#f5f5f5' },
   ]
 
   function calcAge(dateString) {
@@ -186,89 +188,136 @@ export default function Manager({ patientId }: { patientId?: string }) {
     'LOINC/Patient/Sex': () => patient.sex
   }
 
+  const evaluateCriterion = async (criterion) => {
+
+    console.log(criterion)
+    let expression = await getExpression({ filterByFormula: `SEARCH("${criterion.expression[0]}",{expression_id})` })
+    expression = expression?.records[0]
+
+    let filter = await getFilter({ filterByFormula: `SEARCH("${criterion.filter[0]}",{local_id})` })
+    filter = filter?.records[0]
+
+    const expressionValueAccessor = expressionValueAccessors[expression.fields.name]
+
+    if (expressionValueAccessor) {
+      const expressionValue = expressionValueAccessor()
+      const criterionValue = criterion.value
+      const filterSymbol = filter.fields.symbol
+      const useQuotes = ['='].includes(filterSymbol)
+      const expressionScript =
+        (useQuotes ? `"${expressionValue}"` : expressionValue) +
+        (filterSymbol == '=' ? ` == ` : ` ${filterSymbol} `) +
+        (useQuotes ? `"${criterionValue}"` : criterionValue)
+      const expressionResult = eval(expressionScript)
+
+      console.log('Testing inclusion for', expressionScript, expressionResult)
+
+      return expressionResult
+
+    } else {
+      console.log('Skip ' + expression.fields.name)
+      return undefined
+    }
+
+  }
+
   const onRefreshBundles = useCallback(async () => {
+
     let eligibleBundles = []
     let ineligibleBundles = []
     for (const bundle of bundles) {
       const { filters_inclusion, filters_exclusion } = bundle.fields
       const filtersInclusion = JSON.parse(filters_inclusion)
       const filtersExclusion = JSON.parse(filters_exclusion)
-      const inclusionCriteria: CriteriaTypes[] = await Promise.all(
+      const inclusionCriteria: CriteriaTypes[] = flatten(await Promise.all(
         (filtersInclusion ?? []).map(
           async ({ operands }) => compact(await Promise.all(
             operands.map(async (criterionId) => {
               const res = await getCriterias({ filterByFormula: `SEARCH("${criterionId}",{criterion_id})` })
-              return res?.records[0] as CriteriaTypes
-            })))))
-      const exclusionCriteria: CriteriaTypes[] = await Promise.all(
+              const rec = res?.records[0]
+              return { id: rec.id, ...rec.fields } as CriteriaTypes
+            }))))))
+      const exclusionCriteria: CriteriaTypes[] = flatten(await Promise.all(
         (filtersExclusion ?? []).map(
           async ({ operands }) => compact(await Promise.all(
             operands.map(async (criterionId) => {
               const res = await getCriterias({ filterByFormula: `SEARCH("${criterionId}",{criterion_id})` })
-              return res?.records[0] as CriteriaTypes
-            })))))
+              const rec = res?.records[0]
+              return { id: rec.id, ...rec.fields } as CriteriaTypes
+            }))))))
       const inclusionOperator = filtersInclusion[0]?.operator
       const exclusionOperator = filtersExclusion[0]?.operator
-      let meetsInclusion: boolean = inclusionOperator === 'and'
+
+      const inclusionCriteriaResults: boolean[] = []
+      const exclusionCriteriaResults: boolean[] = []
+
+      console.log(inclusionCriteria, exclusionCriteria)
+
       for (const criterion of inclusionCriteria) {
-        let expression = await getExpression({ filterByFormula: `SEARCH("${criterion[0].fields.expression[0]}",{expression_id})` })
-        expression = expression?.records[0]
-        let filter = await getFilter({ filterByFormula: `SEARCH("${criterion[0].fields.filter[0]}",{local_id})` })
-        filter = filter?.records[0]
-        const expressionValueAccessor = expressionValueAccessors[expression.fields.name]
-        if (expressionValueAccessor) {
-          const expressionValue = expressionValueAccessor()
-          const criterionValue = criterion[0].fields.value
-          const filterSymbol = filter.fields.symbol
-          const useQuotes = ['='].includes(filterSymbol)
-          const expressionScript =
-            (useQuotes ? `"${expressionValue}"` : expressionValue) +
-            (filterSymbol == '=' ? ` == ` : ` ${filterSymbol} `) +
-            (useQuotes ? `"${criterionValue}"` : criterionValue)
-          const expressionResult = eval(expressionScript)
-          if (inclusionOperator == 'and' && !expressionResult) {
-            meetsInclusion = false
-            break
-          }
-          if (inclusionOperator == 'or' && expressionResult) {
-            meetsInclusion = true
-            break
-          }
-        } else {
-          console.log('Skip ' + expression.fields.name)
-        }
+        const meetsCriterion = await evaluateCriterion(criterion)
+        inclusionCriteriaResults.push(meetsCriterion)
       }
-      if (meetsInclusion) {
+
+      for (const criterion of exclusionCriteria) {
+        const meetsCriterion = await evaluateCriterion(criterion)
+        exclusionCriteriaResults.push(meetsCriterion)
+      }
+
+      const meetsInclusion: boolean = inclusionCriteriaResults.length === 0 ? true :
+        (inclusionOperator === 'and' ?
+          every(inclusionCriteriaResults) : some(inclusionCriteriaResults))
+
+
+      const meetsExclusion: boolean = exclusionCriteriaResults.length === 0 ? false :
+        (exclusionOperator === 'and' ?
+          every(exclusionCriteriaResults) : some(exclusionCriteriaResults))
+
+      console.log(bundle, meetsInclusion, meetsExclusion)
+
+      if (meetsInclusion && !meetsExclusion) {
         eligibleBundles.push(bundle.id)
       } else {
         ineligibleBundles.push(bundle.id)
       }
     }
+
     for (const eligibleBundleId of eligibleBundles) {
       if (bundleHistory.find(({ bundle }) => bundle[0] === eligibleBundleId)) {
-        console.log('Already there')
+        console.log('Bundle already exists in history.')
       } else {
-        console.log(bundleHistory)
-        console.log('Creating', {
-          patient: [patientId],
-          bundle: [eligibleBundleId],
-          status: 'eligible',
-          eligible_date: new Date().toISOString().slice(0, 10)
-        })
-        await createHistory({
+        const history = {
           fields: {
             patient: [patientId],
             bundle: [eligibleBundleId],
             status: 'eligible',
             eligible_date: new Date().toISOString().slice(0, 10)
           }
-        })
+        }
+        console.log(history)
+        await createHistory(history)
+      }
+    }
+
+    for (const ineligibleBundleId of ineligibleBundles) {
+      if (bundleHistory.find(({ bundle }) => bundle[0] === ineligibleBundleId)) {
+        console.log('Bundle already exists in history.')
+      } else {
+        const history = {
+          fields: {
+            patient: [patientId],
+            bundle: [ineligibleBundleId],
+            status: 'ineligible',
+            eligible_date: new Date().toISOString().slice(0, 10)
+          }
+        }
+        console.log(history)
+        await createHistory(history)
       }
     }
     window.location.reload()
     setBundleEligibility({ eligibleBundles, ineligibleBundles })
-    console.log({ eligibleBundles, ineligibleBundles })
-  }, [bundles, patient])
+
+  }, [bundles, patient, bundleHistory])
 
   return (
     <PageContext.Provider
@@ -392,6 +441,18 @@ export default function Manager({ patientId }: { patientId?: string }) {
                       </Box>
                     </Box>
                     <Box>
+                      <Link onClick={onRefreshBundles}>
+                        <Button
+                          borderRadius="5"
+                          width="100%"
+                          height="10"
+                          leftIcon={<RepeatIcon />}
+                        >
+                          <Text>Check for new pathways</Text>
+                        </Button>
+                      </Link>
+                    </Box>
+                    <Box mt="16px">
                       <Link onClick={onEditPatientOpen}>
                         <Button
                           borderRadius="5"
@@ -411,22 +472,11 @@ export default function Manager({ patientId }: { patientId?: string }) {
                           height="10"
                           leftIcon={<PlusSquareIcon />}
                         >
-                          <Text>Create a new note</Text>
+                          <Text>Create a new text note</Text>
                         </Button>
                       </Link>
                     </Box>
-                    <Box mt="16px">
-                      <Link onClick={onRefreshBundles}>
-                        <Button
-                          borderRadius="5"
-                          width="100%"
-                          height="10"
-                          leftIcon={<RepeatIcon />}
-                        >
-                          <Text>Refresh bundles</Text>
-                        </Button>
-                      </Link>
-                    </Box>
+
                   </Box>
                 </Grid>
               )}
@@ -465,8 +515,16 @@ export default function Manager({ patientId }: { patientId?: string }) {
                                 >
                                   <Link
                                     onClick={() => {
-                                      setClickedBundleId(bundle.bundle[0])
-                                      onBundleActionsOpen()
+                                      if (bundle.status === 'ineligible') {
+                                        const override = prompt('This patient is not eligible for this bundle based on available information. Enter "yes" to override and proceed.')
+                                        if (override === 'yes') {
+                                          setClickedBundleId(bundle.bundle[0])
+                                          onBundleActionsOpen()
+                                        }
+                                      } else {
+                                        setClickedBundleId(bundle.bundle[0])
+                                        onBundleActionsOpen()
+                                      }
                                     }}
                                   >
                                     <Box mb="16px">
@@ -518,7 +576,7 @@ export default function Manager({ patientId }: { patientId?: string }) {
                 <ModalOverlay />
                 <ModalContent>
                   <ModalHeader mt="8">
-                    What would you like to do with this bundle?
+                    What would you like to do with this pathway?
                   </ModalHeader>
                   <ModalCloseButton />
                   <ModalBody pb={8} align="center">
@@ -602,7 +660,7 @@ export default function Manager({ patientId }: { patientId?: string }) {
               <Box position="absolute" bottom="32px" right="32px" width="200px">
                 <RouteLink to="/builder">
                   <Button colorScheme="green" size="md" width="100%">
-                    <Text>Open Protocol Editor</Text>
+                    <Text>Open Pathway Editor</Text>
                   </Button>
                 </RouteLink>
               </Box>

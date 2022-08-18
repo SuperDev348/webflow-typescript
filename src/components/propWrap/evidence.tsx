@@ -77,66 +77,66 @@ const Evidence = (props: EvidenceProps) => {
   }, [builderState])
   return (
     <>
-    {!(
-      builderState.propertyData?.name === 'Start' ||
-      builderState.propertyData?.name === 'End' ||
-      builderState.propertyData?.name === 'Custom' ||
-      builderState.propertyData?.name === 'Apply'
-    ) && (
-        <Box id="evidence">
-          <Text className="header2" style={{ marginBottom: '10px' }}>
-            Evidence
-          </Text>
-          <Box className="evidencelist">
-            <Text className="inputlabel">Select a reference: </Text>
-            <Select
-              className="addbranch References"
-              values={selectedReferences}
-              options={references}
-              multi
-              searchable
-              searchBy="fields.name"
-              searchFn={onSearch}
-              loading={references.length > 0 ? false : true}
-              onChange={values => {
-                setSelectedReferences(values)
-              }}
-              labelField="fields.name"
-              valueField="id"
-            />
-            <Text className="inputlabel" style={{ marginTop: '10px' }}>
-              Select a keypoint:{' '}
+      {!(
+        builderState.propertyData?.name === 'Start' ||
+        builderState.propertyData?.name === 'End' ||
+        builderState.propertyData?.name === 'Custom' ||
+        builderState.propertyData?.name === 'Apply'
+      ) && (
+          <Box id="evidence" style={{ marginTop: '50px' }}>
+            <Text className="header2" style={{ marginBottom: '10px' }}>
+              Evidence
             </Text>
-            <Select
-              className="addbranch Keypoints"
-              values={selectedKeypoints}
-              options={keypoints}
-              multi
-              searchable
-              searchBy="fields.name"
-              searchFn={onSearch}
-              loading={keypoints.length > 0 ? false : true}
-              onChange={values => {
-                setSelectedKeypoints(values)
-              }}
-              labelField="fields.name"
-              valueField="id"
-            />
-            <Box display="flex" float="right" mt="4">
-              <Button colorScheme="gray" onClick={handleCancel}>
-                Cancel
-              </Button>
-              <Button
-                colorScheme="blue"
-                ml="4"
-                onClick={handleSave}
-              >
-                Save
-              </Button>
+            <Box className="evidencelist">
+              <Text className="inputlabel">Select a reference: </Text>
+              <Select
+                className="addbranch References"
+                values={selectedReferences}
+                options={references}
+                multi
+                searchable
+                searchBy="fields.name"
+                searchFn={onSearch}
+                loading={references.length > 0 ? false : true}
+                onChange={values => {
+                  setSelectedReferences(values)
+                }}
+                labelField="fields.name"
+                valueField="id"
+              />
+              <Text className="inputlabel" style={{ marginTop: '10px' }}>
+                Select a keypoint:{' '}
+              </Text>
+              <Select
+                className="addbranch Keypoints"
+                values={selectedKeypoints}
+                options={keypoints}
+                multi
+                searchable
+                searchBy="fields.name"
+                searchFn={onSearch}
+                loading={keypoints.length > 0 ? false : true}
+                onChange={values => {
+                  setSelectedKeypoints(values)
+                }}
+                labelField="fields.name"
+                valueField="id"
+              />
+              <Box display="flex" float="right" mt="4">
+                <Button colorScheme="gray" onClick={handleCancel}>
+                  Cancel
+                </Button>
+                <Button
+                  colorScheme="blue"
+                  ml="4"
+                  onClick={handleSave}
+                >
+                  Save
+                </Button>
+              </Box>
             </Box>
           </Box>
-        </Box>
-      )}
+        )}
     </>
   )
 }

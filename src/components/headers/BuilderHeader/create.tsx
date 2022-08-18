@@ -1,14 +1,14 @@
-import React, {useState, useEffect} from 'react'
-import { 
+import React, { useState, useEffect } from 'react'
+import {
   IconButton,
-  Box, 
+  Box,
   Button,
   Modal,
   ModalOverlay,
   ModalContent,
   ModalHeader,
   ModalBody,
-  useDisclosure 
+  useDisclosure
 } from '@chakra-ui/react'
 import { AddIcon } from '@chakra-ui/icons'
 import Select from 'react-dropdown-select'
@@ -68,10 +68,10 @@ const Create = (props: CreateProps) => {
       >
         <ModalOverlay />
         <ModalContent>
-          <ModalHeader mt="8">Create new protocol</ModalHeader>
+          <ModalHeader mt="8">Create a new bundle</ModalHeader>
           <ModalBody pb={8} align="left">
             <Box style={{ margin: '10px 0px' }}>
-              <span className="inputlabel bundlewithadd">Bundle: </span>
+              <span className="inputlabel bundlewithadd">Pathway: </span>
               {builderState.bundles.length > 0 && (
                 <Select
                   className="addbranch"
@@ -86,11 +86,12 @@ const Create = (props: CreateProps) => {
               )}
             </Box>
             <Box style={{ margin: '10px 0px', display: 'inline-block' }}>
-              <span className="inputlabel">Protocol: </span>
+              <span className="inputlabel">Bundle name: </span>
               <input
                 type="text"
                 className="addprotocol"
                 value={protocolName ?? ''}
+                style={{ border: 'solid 2px #5b7fe5', borderRadius: 4 }}
                 onChange={event => setProtocolName(event.target.value)}
               />
             </Box>

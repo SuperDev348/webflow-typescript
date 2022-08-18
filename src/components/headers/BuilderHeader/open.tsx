@@ -1,14 +1,14 @@
-import React, {useState, useEffect} from 'react'
-import { 
+import React, { useState, useEffect } from 'react'
+import {
   IconButton,
-  Box, 
+  Box,
   Button,
   Modal,
   ModalOverlay,
   ModalContent,
   ModalHeader,
   ModalBody,
-  useDisclosure 
+  useDisclosure
 } from '@chakra-ui/react'
 import Select from 'react-dropdown-select'
 import { TriangleDownIcon } from '@chakra-ui/icons'
@@ -45,7 +45,7 @@ const Open = (props: OpenProps) => {
   useEffect(() => {
     setBundle(selBundle)
     setProtocol(selProtocol)
-    setSelectableProtocols( builderState.protocols.filter(protocol =>
+    setSelectableProtocols(builderState.protocols.filter(protocol =>
       protocol.fields.bundles?.includes(selBundle?.id),
     ))
   }, [builderState.protocols, selProtocol, selBundle])
@@ -64,10 +64,10 @@ const Open = (props: OpenProps) => {
       >
         <ModalOverlay />
         <ModalContent>
-          <ModalHeader mt="8">Open existing protocol</ModalHeader>
+          <ModalHeader mt="8">Open a bundle</ModalHeader>
           <ModalBody pb={8} align="left">
             <Box style={{ margin: '10px 0px' }}>
-              <span className="inputlabel">Bundle: </span>
+              <span className="inputlabel">Pathway: </span>
               {builderState.bundles.length > 0 && (
                 <Select
                   className="addbranch"
@@ -82,7 +82,7 @@ const Open = (props: OpenProps) => {
               )}
             </Box>
             <Box style={{ margin: '10px 0px' }}>
-              <span className="inputlabel">Protocol: </span>
+              <span className="inputlabel">Bundle: </span>
               {
                 <Select
                   className="addbranch"

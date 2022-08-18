@@ -48,6 +48,7 @@ export const BLOCK_TYPES = {
   Structure: {
     Start: 'recPiOaYskQi3aGmr',
     End: 'recbBVLxQdZp16mtL',
+    Choose: 'recW8SmmHSOUjo44e',
     Filter: 'recUTngsdR4I39G9W',
     Branch: 'rec8SnoKDGhEKUleU',
   },
@@ -295,6 +296,18 @@ export const Right_Card = [
     isMulti: false,
     hasSelectInput: true,
     hasTextInput: true,
+  },
+  {
+    id: 'recebF0NuiiWrO7GS',
+    name: 'Choose',
+    lefticon: `${BUILDER_URL}/assets/branch_blue.svg`,
+    desc: 'Branch on a specific condition.',
+    templateTitle: '',
+    template: 'Branch on a specific condition.',
+    begin: '',
+    isMulti: false,
+    hasSelectInput: false,
+    hasTextInput: false,
   },
   {
     id: 'reclGPhiwyIhGMuO6',

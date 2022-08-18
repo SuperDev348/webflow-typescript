@@ -96,7 +96,7 @@ export const PrescribeNode = (props: PrescribeNodePropsType) => {
                 <Heading size="sm" mt="8px" mb="8px">
                   {drug.name}
                 </Heading>
-                <DosageSection title="" dosageIds={[dosageId]} />
+                {dosageId && <DosageSection title="" dosageIds={[dosageId]} />}
               </Suspense>
             </DbProvider>
           </PathwayThemeProvider>
@@ -136,7 +136,7 @@ export const PrescribeNode = (props: PrescribeNodePropsType) => {
                   {drug.name}
                 </Heading>
                 <Box mt="-16px" ml="-4px">
-                  <DosageSection title="" dosageIds={[dosageId]} />
+                  {dosageId && <DosageSection title="" dosageIds={[dosageId]} />}
                 </Box>
               </Suspense>
             </DbProvider>

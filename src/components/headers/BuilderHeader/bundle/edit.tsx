@@ -1,6 +1,6 @@
 import React, { useState, forwardRef, useImperativeHandle, useEffect } from 'react'
-import { 
-  Box, 
+import {
+  Box,
   Text,
   Heading,
   Input,
@@ -22,13 +22,13 @@ export interface EditFunctionInterface {
   save(): void;
 }
 const Edit = forwardRef<EditFunctionInterface, EditProps>((props, ref) => {
-  const {bundleId, saveExpressions} = props
-  const {builderState, dispatch} = useBuilder()
+  const { bundleId, saveExpressions } = props
+  const { builderState, dispatch } = useBuilder()
   const [name, setName] = useState('')
   const [inclusionFilters, setInclusionFilters] = useState<FilterProps[]>([])
   const [exclusionFilters, setExclusionFilters] = useState<FilterProps[]>([])
 
-  const getFilters = (filterString: string) : FilterProps[] => {
+  const getFilters = (filterString: string): FilterProps[] => {
     const tmp = JSON.parse(filterString)
     let tmpFilters = []
     for (let i = 0; i < tmp[0].operands.length; i++) {
@@ -46,7 +46,7 @@ const Edit = forwardRef<EditFunctionInterface, EditProps>((props, ref) => {
           criteria_id: tempCriteria.criterion_id,
         })
       }
-    } 
+    }
     for (let i = 0; i < tmp[1].operands.length; i++) {
       let tempCriteria = builderState.criterias.find(
         ({ id }) => id === tmp[1].operands[i],
@@ -119,7 +119,7 @@ const Edit = forwardRef<EditFunctionInterface, EditProps>((props, ref) => {
   useEffect(() => {
     if (bundleId !== '') {
       const bundle = builderState.bundles.find(({ id }) => id === bundleId)
-      if (!bundle) 
+      if (!bundle)
         return
       setName(bundle.fields.name)
       setInclusionFilters(getFilters(bundle.fields.filters_inclusion))
@@ -135,7 +135,7 @@ const Edit = forwardRef<EditFunctionInterface, EditProps>((props, ref) => {
         mt="32px"
       ></Box>
       <Heading size="md" mb="16px" mt="24px">
-        Edit bundle
+        Edit pathway
       </Heading>
       <Box mt="8px">
         <Box>

@@ -375,6 +375,7 @@ export type PatientType = {
 } | null
 
 export type UserType = {
+  id: string
   name: string
   title: string
   licenseNumber: string

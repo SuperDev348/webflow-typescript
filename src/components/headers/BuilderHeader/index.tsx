@@ -31,7 +31,7 @@ type BuilderHeaderPropsType = {
 }
 const BuilderHeader = (props: BuilderHeaderPropsType) => {
   const { selBundle, selProtocol, saveExpressions } = props
-  const {builderState} = useBuilder()
+  const { builderState } = useBuilder()
   const [title, setTitle] = useState<string>('')
   const [subTitle, setSubTitle] = useState<string>('')
 
@@ -49,7 +49,7 @@ const BuilderHeader = (props: BuilderHeaderPropsType) => {
       <CSSReset />
       <Box bg="white" position="relative" style={{ zIndex: 5 }}>
         <Header
-          title="Protocol Editor"
+          title="Pathway Editor"
           left={
             <Flex>
               {selProtocol ? (
@@ -62,7 +62,7 @@ const BuilderHeader = (props: BuilderHeaderPropsType) => {
               ) : (
                 <Box mr="4">
                   <Heading as="h3" size="sm" noOfLines={1} lineHeight="43px">
-                    Open a protocol
+                    Open a bundle
                   </Heading>
                 </Box>
               )}
@@ -76,10 +76,10 @@ const BuilderHeader = (props: BuilderHeaderPropsType) => {
                   selProtocol={selProtocol}
                 />
               )}
-              <Create 
+              <Create
                 selBundle={selBundle}
               />
-              <Bundle 
+              <Bundle
                 saveExpressions={saveExpressions}
               />
             </Flex>

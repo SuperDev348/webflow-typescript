@@ -7,11 +7,30 @@ import {
   Text,
   Badge,
 } from '@chakra-ui/react'
+
+import {
+  Drawer,
+  DrawerOverlay,
+  DrawerContent,
+  DrawerCloseButton,
+  DrawerHeader,
+  DrawerBody,
+} from '@chakra-ui/react'
+
+const drawerComponents = {
+  Drawer,
+  DrawerOverlay,
+  DrawerContent,
+  DrawerCloseButton,
+  DrawerHeader,
+  DrawerBody,
+}
+
 import { ArrowForwardIcon, ArrowLeftIcon } from '@chakra-ui/icons'
 import { ThemeProvider, CSSReset, theme, Link } from '@chakra-ui/react'
 import { Database, Parsed } from '@pathwaymd/pathway-parser'
 import { Protocol, DbProvider, PathwayThemeProvider } from '@pathwaymd/pathway-ui2'
-import { DemographicsPatientState } from '@pathwaymd/pathway-ui2/src/components/Protocol/Protocol.StateSliceTypes'
+import { DemographicsPatientState, NormativeUserState } from '@pathwaymd/pathway-ui2/src/components/Protocol/Protocol.StateSliceTypes'
 
 import { Styles } from './style/bundleStyle'
 import { BundleType, PatientType, UserType, ProtocolType } from '../types'
@@ -25,6 +44,8 @@ import { get as getPatient } from '../api/patient'
 import { get as getUser } from '../api/user'
 import { get as getBundle } from '../api/bundle'
 import { getFilter as getProtocols } from '../api/protocol'
+import { sortBy } from 'lodash'
+import { userInfo } from 'os'
 
 type ProtocolStateType = {
   isComplete: boolean
@@ -150,7 +171,7 @@ function BundleProtocolList(props: BundleProtocolListPropsType) {
       overflowY="hidden"
       whiteSpace="nowrap"
     >
-      {protocols.map((protocol: ProtocolType, i: number) => (
+      {sortBy(protocols, (p) => p.fields.name).map((protocol: ProtocolType, i: number) => (
         <Box
           key={protocol.id}
           display="inline-flex"
@@ -180,7 +201,7 @@ function BundleProtocolList(props: BundleProtocolListPropsType) {
               >
                 <Box>
                   <Text display="block" fontWeight="normal">
-                    Protocol #{i + 1}
+                    Bundle #{i + 1}
                   </Text>
                   <Heading as="h3" display="block" fontSize="md" mt="0.15em">
                     {protocol.fields?.name}
@@ -198,13 +219,14 @@ function BundleProtocolList(props: BundleProtocolListPropsType) {
 type ContextualizedProtocolPropsType = {
   protocolId: string
   patient: PatientType
+  user: UserType
   onStateChange: (protocolId: string, protocolState: any) => void
 }
 
 function ContextualizedProtocol(props: ContextualizedProtocolPropsType) {
   const PatientContext = React.createContext<PatientType | null>(null)
   const ProtocolContext = React.createContext<ProtocolStateType | null>(null)
-  const { protocolId, patient, onStateChange } = props
+  const { protocolId, patient, user, onStateChange } = props
   const [collectedDb, setCollectedDb] = useState<Database | null>(null)
 
   useAsync(
@@ -225,19 +247,32 @@ function ContextualizedProtocol(props: ContextualizedProtocolPropsType) {
   } = {}
   demographicsPatientStates[patient.id] = patient
 
+  const normativeUserStates: {
+    [id: string]: NormativeUserState
+  } = {}
+  normativeUserStates[user.id] = user
+
   return collectedDb && (
-    <Box maxWidth="1000px" mx="auto" pb="32px">
+    <Box pl="xl" pb="32px">
       <PathwayThemeProvider>
 
         <DbProvider db={collectedDb}>
           <Suspense fallback={null}>
             <Protocol
               isContextualized={true}
+              showNoteLogger={true}
               unfoldPaths={false}
+              patientId={patient.id}
               protocolId={protocolId}
-            // initialPatientState={{
-            //   demographicsPatientStates
-            // }}
+              userId={user.id}
+              initialPatientStates={{
+                demographicsPatientStates
+              }}
+              initialUserStates={{
+                normativeUserStates
+              }}
+              drawerComponents={drawerComponents}
+              stickyHeightOffset={Math.min(25, 150 - document.documentElement.scrollTop)}
             />
           </Suspense>
         </DbProvider>
@@ -297,7 +332,19 @@ const Bundle = () => {
       const selectedUser = formatAirtableResult(tmp)
       const selectedBundle = await getBundle(bundleId)
       const selectedProtocols = await getProtocolsWithBundle(bundleId)
-      const defaultProtocolId = selectedProtocols[0].id
+
+      if (selectedProtocols.length == 0) {
+        setDefaultProtocolId(null)
+        return [
+          selectedPatient,
+          selectedUser,
+          selectedBundle,
+          selectedProtocols,
+          null
+        ]
+      }
+
+      const defaultProtocolId = sortBy(selectedProtocols, (p) => p.fields.name)[0].id
       setDefaultProtocolId(defaultProtocolId)
       const selectedProtocol = selectedProtocols.find(
         x => x.id == (protocolId ?? defaultProtocolId),
@@ -318,7 +365,7 @@ const Bundle = () => {
       selectedProtocol,
     ]: [PatientType, UserType, BundleType, ProtocolType[], ProtocolType]) => {
       setPatient(selectedPatient)
-      setUser(selectedUser)
+      setUser({ id: userId, ...selectedUser })
       setBundle(selectedBundle)
       setProtocols(selectedProtocols)
       setProtocol(selectedProtocol)
@@ -332,17 +379,54 @@ const Bundle = () => {
   }
   //const resetDialogOpenState = useState(false)
   //const [isResetDialogOpen, setResetDialogOpen] = resetDialogOpenState
+
   const renderedProtocol = useMemo(() => {
+
+    if (!protocol && !!patient) {
+      return <Box p={8} pt={4}><Text>
+        <Link color="#5672c1" href={`/builder`}>Add a protocol</Link> to this bundle to use it with this patient.
+      </Text></Box>
+    }
+
+    if (!user) {
+      return <Box p={8} pt={4}><Text>
+        Loading...
+      </Text></Box>
+    }
+
+    console.log(user)
     return (
       <ContextualizedProtocol
         protocolId={protocolId ?? defaultProtocolId}
         patient={patient}
+        user={user}
         onStateChange={onProtocolStateChange}
       />
     )
-  }, [protocolId, patient])
+  }, [protocolId, protocol, patient, user])
 
-  return !protocol || !patient ? (
+
+  const renderedBundleList = useMemo(() => {
+
+    if (protocols.length == 0) {
+      return <Box p={8} pb={4}><Text fontStyle="italic">
+        This bundle does not contain any protocol(s).
+      </Text></Box>
+    }
+
+    return (
+      <BundleProtocolList
+        patientId={patientId}
+        bundleId={bundleId}
+        selectedProtocolId={protocolId ?? defaultProtocolId}
+        protocolStates={protocolStates}
+        protocols={protocols}
+      />
+    )
+  }, [patientId, protocolId, bundleId, protocols, protocolStates])
+
+
+  return !patient ? (
     <>Loading...</>
   ) : (
     <Styles>
@@ -352,17 +436,14 @@ const Bundle = () => {
           <BundleHeader patient={patient} user={user} bundle={bundle} />
           {/*<ResetDialog openState={resetDialogOpenState} onReset={reset} />*/}
 
-          {
-            <BundleProtocolList
-              patientId={patientId}
-              bundleId={bundleId}
-              selectedProtocolId={protocolId ?? defaultProtocolId}
-              protocolStates={protocolStates}
-              protocols={protocols}
-            />
-          }
-
-          {renderedProtocol}
+          {renderedBundleList}
+          <Box height={4} borderBottom="1px solid lightgray">
+          </Box>
+          <Box height={6}>
+          </Box>
+          <Box>
+            {renderedProtocol}
+          </Box>
         </ThemeProvider>
       </BareLayout>
     </Styles>

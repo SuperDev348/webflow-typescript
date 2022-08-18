@@ -60,7 +60,7 @@ export const CalculatorNode = (props: CalculatorNodePropsType) => {
                 onStateChange={x => {
                   console.log(x)
                 }}
-                omitReference={true}
+                compactDisplay={true}
               />
             </Suspense>
           </DbProvider>

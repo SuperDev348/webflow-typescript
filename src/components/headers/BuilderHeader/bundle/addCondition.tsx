@@ -193,12 +193,12 @@ const AddCondition = (props: AddConditionProps) => {
         <Box my="5">
           {filters.length > 0 && (
             <Box className="select-condition">
-              <span style={{ width: '75px' }}>
+              <div style={{ padding: '5px 0px' }}>
                 Condition:{' '}
-              </span>
+              </div>
               <Select
                 className="addfilterselect"
-                style={{ width: '364px' }}
+                style={{ width: '100%' }}
                 options={Filter_Conditions}
                 values={condition}
                 onChange={value => {
@@ -210,10 +210,10 @@ const AddCondition = (props: AddConditionProps) => {
             </Box>
           )}
           <Box className="select-condition">
-            <span style={{ width: '75px' }}>System: </span>
+            <div style={{ padding: '5px 0px' }}>System: </div>
             <Select
               className="addfilterselect"
-              style={{ width: '364px' }}
+              style={{ width: '100%' }}
               options={Filter_System}
               values={system}
               onChange={handleChangeSystem}
@@ -222,13 +222,12 @@ const AddCondition = (props: AddConditionProps) => {
             />
           </Box>
           <Box className="select-condition">
-            <span style={{ width: '75px' }}>Variable: </span>
+            <div style={{ padding: '5px 0px' }}>Variable: </div>
             <Select
               className="bs Variable"
               style={{
-                width: '364px',
+                width: '100%',
                 height: '100%',
-                marginLeft: '8px',
               }}
               options={variables}
               values={variable}
@@ -249,10 +248,10 @@ const AddCondition = (props: AddConditionProps) => {
             />
           </Box>
           <Box className="select-condition">
-            <span style={{ width: '75px' }}>Filter: </span>
+            <div style={{ padding: '5px 0px' }}>Filter: </div>
             <Select
               className="addfilterselect"
-              style={{ width: '364px' }}
+              style={{ width: '100%' }}
               options={filterTypes}
               values={filterType}
               disabled={
@@ -268,7 +267,7 @@ const AddCondition = (props: AddConditionProps) => {
               'Ord',
             ) && (
                 <>
-                  <span style={{ width: '75px' }}>Value: </span>
+                  <div style={{ padding: '5px 0px' }}>Value: </div>
                   {filterType[0]?.fields.name?.includes(
                     'between',
                   ) ? (
@@ -276,28 +275,43 @@ const AddCondition = (props: AddConditionProps) => {
                       <input
                         type="text"
                         style={{
-                          width: '167px',
+                          width: '100%',
                           padding: '3px',
+                          border: 'solid 1px #cccccc',
+                          outline: 'none',
+                          borderRadius: 2
                         }}
                         onChange={event => setValue(event.target.value)}
+                        disabled={
+                          system.length > 0 ? false : true
+                        }
                       />
-                      <span style={{ padding: '3px' }}>
+                      <div style={{ padding: '5px 0px' }}>
                         &nbsp;to
-                      </span>
+                      </div>
                       <input
                         type="text"
                         style={{
-                          width: '167px',
+                          width: '100%',
                           padding: '3px',
+                          border: 'solid 1px #cccccc',
+                          outline: 'none',
+                          borderRadius: 2
                         }}
                         onChange={event => setSecondValue(event.target.value)}
+                        disabled={
+                          system.length > 0 ? false : true
+                        }
                       />
                     </>
                   ) : (
                     <input
                       type="text"
-                      style={{ width: '364px', padding: '5px' }}
+                      style={{ width: '100%', padding: '5px', border: 'solid 1px #cccccc', outline: 'none', borderRadius: 2 }}
                       onChange={event => setValue(event.target.value)}
+                      disabled={
+                        system.length > 0 ? false : true
+                      }
                     />
                   )}
                 </>

@@ -103,7 +103,7 @@ const Use = (props) => {
                     calculatorId={
                       selectedOptions[0].fields.calculator_id
                     }
-                    omitReference={true}
+                    compactDisplay={true}
                     onStateChange={() => { }}
                   />
                 </Suspense>

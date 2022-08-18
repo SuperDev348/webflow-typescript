@@ -1111,6 +1111,14 @@ export const CardList_Structures = [
   },
   {
     id: 19,
+    name: 'Choose',
+    desc: 'Branch on a specific condition.',
+    lefticon: `${BUILDER_URL}/assets/branch.svg`,
+    selectType: '',
+    targetResource: '',
+  },
+  {
+    id: 20,
     name: 'End',
     desc: 'End care process.',
     lefticon: `${BUILDER_URL}/assets/end.svg`,
@@ -1121,7 +1129,7 @@ export const CardList_Structures = [
 
 export const CardList_Connects = [
   {
-    id: 20,
+    id: 21,
     name: 'Contact',
     desc: 'Contact a patient by e-mail or by phone.',
     lefticon: `${BUILDER_URL}/assets/contact.svg`,
@@ -1129,7 +1137,7 @@ export const CardList_Connects = [
     targetResource: 'periods',
   },
   {
-    id: 21,
+    id: 22,
     name: 'Educate',
     desc: 'Send an educational handout to a patient.',
     lefticon: `${BUILDER_URL}/assets/education.svg`,
@@ -1137,7 +1145,7 @@ export const CardList_Connects = [
     targetResource: '',
   },
   {
-    id: 22,
+    id: 23,
     name: 'Remind',
     desc: 'Send a reminder to a patient.',
     lefticon: `${BUILDER_URL}/assets/reminder.svg`,

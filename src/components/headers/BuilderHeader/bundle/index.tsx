@@ -1,13 +1,13 @@
-import React, {useState, useRef} from 'react'
-import { 
-  Box, 
+import React, { useState, useRef } from 'react'
+import {
+  Box,
   Text,
   Button,
   Modal,
   ModalOverlay,
   ModalContent,
   ModalBody,
-  useDisclosure 
+  useDisclosure
 } from '@chakra-ui/react'
 
 import BundleItems from './items'
@@ -18,7 +18,7 @@ type BundleProps = {
   saveExpressions: Function
 }
 const Bundle = (props: BundleProps) => {
-  const {saveExpressions} = props
+  const { saveExpressions } = props
   const { isOpen: isOpen, onOpen: onOpen, onClose: onClose } = useDisclosure()
   const createRef = useRef<CreateFunctionInterface>()
   const editRef = useRef<EditFunctionInterface>()
@@ -59,7 +59,7 @@ const Bundle = (props: BundleProps) => {
   return (
     <>
       <Button p="16px" ml="16px" onClick={handleOpen}>
-        <Text>Edit bundles</Text>
+        <Text>Edit pathways</Text>
       </Button>
       <Modal
         closeOnOverlayClick={true}

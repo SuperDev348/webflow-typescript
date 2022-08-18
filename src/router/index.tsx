@@ -1,6 +1,8 @@
 import React from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 
+import Stats from '../containers/stats'
+import Analytics from '../containers/analytics'
 import Builder from '../containers/builder'
 import Bundle from '../containers/bundle'
 import Manager from '../containers/Manager'
@@ -37,6 +39,15 @@ const defaultRoutes = () => {
         <Route
           path="/patients/:patientId/bundles/:bundleId"
           element={<Bundle />}
+        />
+        <Route path="/patients/:patientId" element={<Manager />} />
+        <Route
+          path="/stats"
+          element={<Stats />}
+        />
+        <Route
+          path="/analytics"
+          element={<Analytics />}
         />
         <Route path="/patients/:patientId" element={<Manager />} />
       </Routes>

@@ -596,8 +596,6 @@ const Canvas = (props: CanvasProps) => {
       const newCards = [...rightCards]
       const rootElement = newCards.find(({ id }) => id === 1)
       if (rootElement) {
-        const width = getElementWidth(1, newCards)
-        const offset = ((paddingX + cardWidth) * (width - 1)) / 2
         if (rootElement.position.x === -1 && rootElement.position.y === -1) {
           if (rootPosition) {
             rootElement.position = rootPosition
@@ -607,11 +605,13 @@ const Canvas = (props: CanvasProps) => {
             setRootPosition({ x: 380, y: 30 })
           }
         }
-        if (offset > rootElement.position.x) {
-          rootElement.position.x = offset
-          rootElement.position.y = paddingY
-          setRootPosition({ x: offset, y: paddingY })
-        }
+        // const width = getElementWidth(1, newCards)
+        // const offset = ((paddingX + cardWidth) * (width - 1)) / 2
+        // if (offset > rootElement.position.x) {
+        //   rootElement.position.x = offset
+        //   rootElement.position.y = paddingY
+        //   setRootPosition({ x: offset, y: paddingY })
+        // }
         addPositionToChildren(1, rootElement.position, newCards)
       }
       return newCards
@@ -633,9 +633,10 @@ const Canvas = (props: CanvasProps) => {
       if (result.length > 0) {
         setHasFirstCard(true)
         setCnt(result.length + 1)
-        setRightCards(rearrange(result))
+        const _newCards = rearrange(result) 
+        setRightCards(_newCards)
         // props.onSaveCards(rearrange(result))
-        setArrows(drawArrows(rearrange(result)))
+        setArrows(drawArrows(_newCards))
       }
       result = []
     }
@@ -822,6 +823,10 @@ const Canvas = (props: CanvasProps) => {
       const activeBranch = dataTransfer.getData('activeBranch')
       if (activeCard) {
         const activeData = JSON.parse(activeCard)
+        // type END
+        // if (Right_Card[activeData.id - 1].id === 'reclGPhiwyIhGMuO6') {
+        //   setRootPosition({ x: 380, y: paddingY })
+        // }
         if (!hasFirstCard) {
           if (Right_Card[activeData.id - 1].id !== START_BLOCK_TYPE)
             return

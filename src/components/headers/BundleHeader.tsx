@@ -24,10 +24,10 @@ function BundleHeader(props: BundleHeaderPropsType) {
   const headerHeight = '43px'
 
   return !(patient && user && bundle) ? (
-    <Header title="Bundle Viewer" />
+    <Header title="Clinical Assistant" />
   ) : (
     <Header
-      title="Bundle Viewer"
+      title="Clinical Assistant"
       left={
         <Flex mr="16px">
           <Box mr="16px">

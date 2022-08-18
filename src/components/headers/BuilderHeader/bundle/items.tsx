@@ -7,7 +7,7 @@ import { useBuilder } from '../../../../provider/builder'
 
 const Items = (props) => {
   const { bundleEdit } = props
-  const {builderState, dispatch} = useBuilder()
+  const { builderState, dispatch } = useBuilder()
 
   const handleEdit = (id) => {
     bundleEdit(id)
@@ -20,7 +20,7 @@ const Items = (props) => {
   return (
     <>
       <Heading size="md" mb="24px">
-        List of bundles
+        List of pathways
       </Heading>
       {builderState.bundles.map(bundle => (
         <BundleList

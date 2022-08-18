@@ -895,7 +895,7 @@ export const Styles = styled.div`
       width: 440px;
       border-top: 1px solid lightgray;
       position: absolute;
-      height: 270px;
+      height: 300px;
       bottom: 148px;
       padding: 16px;
       overflow-y: auto;
